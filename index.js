@@ -28,6 +28,15 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+    const usersCollection = client.db('toyVerse').collection('toys');
+
+    // post route for add toys from client side
+    app.post('/toys', async(req, res) => {
+        const toy = req.body;
+        console.log('new toy', toy);
+        const result = await usersCollection.insertOne(toy);
+        res.send(result);
+    });
 
 
     // Send a ping to confirm a successful connection
