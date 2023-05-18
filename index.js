@@ -28,13 +28,24 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    const usersCollection = client.db('toyVerse').collection('toys');
+    const toysCollection = client.db('toyVerse').collection('toys');
+
+
+// route for get all toys
+    app.get('/toys', async(req,res)=>{        
+        const cursor = toysCollection.find();
+        const toys = await cursor.toArray()
+        res.send(toys)
+      })
+    
+
+
 
     // post route for add toys from client side
     app.post('/toys', async(req, res) => {
         const toy = req.body;
         console.log('new toy', toy);
-        const result = await usersCollection.insertOne(toy);
+        const result = await toysCollection.insertOne(toy);
         res.send(result);
     });
 
