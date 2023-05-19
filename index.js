@@ -33,7 +33,12 @@ async function run() {
 
 // route for get all toys
     app.get('/toys', async(req,res)=>{        
-        const cursor = toysCollection.find();
+      let query ={}
+
+      if(req.query?.email) {
+        query = {email:req.query.email}
+      }
+        const cursor = toysCollection.find(query).limit(20);
         const toys = await cursor.toArray()
         res.send(toys)
       })
