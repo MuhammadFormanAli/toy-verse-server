@@ -2,7 +2,7 @@ const express =require("express");
 const cors = require ("cors");
 const app = express();
 require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
 // middleware
@@ -38,8 +38,15 @@ async function run() {
         res.send(toys)
       })
     
+// route for load single toy information
+      app.get('/toys/:id', async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) }
 
-
+        const result = await toysCollection.findOne(query);
+        res.send(result);
+    })
+    
 
     // post route for add toys from client side
     app.post('/toys', async(req, res) => {
