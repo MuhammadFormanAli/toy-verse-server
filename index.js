@@ -26,22 +26,62 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    client.connect();
+    // await client.connect();
 
     const toysCollection = client.db('toyVerse').collection('toys');
 
 
 // route for get all toys
-    app.get('/toys', async(req,res)=>{        
-      let query ={}
+    app.get('/toys', async(req,res)=>{ 
+      // console.log (req.query.sort)
 
+   
+      let query ={}
       if(req.query?.email) {
         query = {email:req.query.email}
       }
-        const cursor = toysCollection.find(query).limit(20);
+
+      if(req.query?.category){
+        query = {category:req.query.category}
+      }
+
+        const cursor = toysCollection.find(query)
         const toys = await cursor.toArray()
         res.send(toys)
       })
+
+
+
+
+
+
+
+
+//for sorting
+app.get('/sort', async(req,res)=>{
+
+  if(req?.query?.sort == 1){
+    sort = {price:1}
+    
+  }else{
+    sort = {price:-1}
+  }
+  
+    query = {email:req.query.email}
+ 
+  console.log('from sort')
+
+  const cursor = toysCollection.find(query).sort(sort)
+  const toys = await cursor.toArray()
+  res.send(toys)
+
+})
+
+
+
+
+
     
 // route for load single toy information
       app.get('/toys/:id', async (req, res) => {
