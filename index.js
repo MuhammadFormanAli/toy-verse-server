@@ -1,5 +1,5 @@
-const express =require("express");
-const cors = require ("cors");
+const express = require("express");
+const cors = require("cors");
 const app = express();
 require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -32,108 +32,110 @@ async function run() {
     const toysCollection = client.db('toyVerse').collection('toys');
 
 
-// route for get all toys
-    app.get('/toys', async(req,res)=>{ 
-      // console.log (req.query.sort)
+    // route for get toys
+    app.get('/toys', async (req, res) => {
 
-   
-      let query ={}
-      if(req.query?.email) {
-        query = {email:req.query.email}
+      let query = {}
+      if (req.query?.email) {
+        query = { email: req.query.email }
       }
 
-      if(req.query?.category){
-        query = {category:req.query.category}
+      if (req.query?.category) {
+        query = { category: req.query.category }
       }
 
-        const cursor = toysCollection.find(query)
-        const toys = await cursor.toArray()
-        res.send(toys)
-      })
-
-
-
-
-
-
-
-
-//for sorting
-app.get('/sort', async(req,res)=>{
-
-  if(req?.query?.sort == 1){
-    sort = {price:1}
-    
-  }else{
-    sort = {price:-1}
-  }
-  
-    query = {email:req.query.email}
- 
-  console.log('from sort')
-
-  const cursor = toysCollection.find(query).sort(sort)
-  const toys = await cursor.toArray()
-  res.send(toys)
-
-})
-
-
-
-
-
-    
-// route for load single toy information
-      app.get('/toys/:id', async (req, res) => {
-        const id = req.params.id;
-        const query = { _id: new ObjectId(id) }
-
-        const result = await toysCollection.findOne(query);
-        res.send(result);
+      const cursor = toysCollection.find(query).limit(20)
+      const toys = await cursor.toArray()
+      res.send(toys)
     })
-    
 
-    // post route for add toys from client side
-    app.post('/toys', async(req, res) => {
-        const toy = req.body;
-        console.log('new toy', toy);
-        const result = await toysCollection.insertOne(toy);
-        res.send(result);
+
+
+
+    // for sorting by price name
+
+    app.get('/sort', async (req, res) => {
+
+
+      let query = { email: req.query.email };
+
+      if (req?.query?.sort == 1) {
+        sort = { 'price': 1 };
+        const cursor = toysCollection.find(query).sort(sort);
+        const toys = await cursor.toArray();
+        toys.sort((a, b) => {
+          return a.price - b.price;
+        });
+        res.send(toys);
+
+      } else {
+        sort = { 'price': -1 };
+        const cursor = toysCollection.find(query).sort(sort);
+        const toys = await cursor.toArray();
+        toys.sort((a, b) => {
+          return b.price - a.price;
+        });
+        res.send(toys);
+      }
+
+
+
+
     });
 
 
 
-// route for update 
-    app.put('/toys/:id', async(req, res) =>{
+    // route for load single toy information
+    app.get('/toys/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+
+      const result = await toysCollection.findOne(query);
+      res.send(result);
+    })
+
+
+    // post route for add toys from client side
+    app.post('/toys', async (req, res) => {
+      const toy = req.body;
+      console.log('new toy', toy);
+      const result = await toysCollection.insertOne(toy);
+      res.send(result);
+    });
+
+
+
+    // route for update 
+    app.put('/toys/:id', async (req, res) => {
       const id = req.params.id;
       const toy = req.body;
       console.log(id, toy);
-      
-      const filter = {_id: new ObjectId(id)}
-      const options = {upsert: true}
+
+      const filter = { _id: new ObjectId(id) }
+      const options = { upsert: true }
       const updatedToy = {
-          $set: {
-            price: toy.price,
-            quantity: toy.quantity,
-            description:toy.description
-          }
+        $set: {
+          price: toy.price,
+          quantity: toy.quantity,
+          description: toy.description
+        }
       }
 
-      const result = await toysCollection.updateOne(filter, updatedToy, options );
+      const result = await toysCollection.updateOne(filter, updatedToy, options);
       res.send(result);
 
-  })
+    })
 
 
 
-// route for delete toys
-    app.delete('/toys/:id', async(req, res) =>{
+    // route for delete toys
+    app.delete('/toys/:id', async (req, res) => {
       const id = req.params.id;
-      const query = { _id: new ObjectId(id)}
-      
+      const query = { _id: new ObjectId(id) }
+
       const result = await toysCollection.deleteOne(query);
       res.send(result);
-  })
+    })
 
 
     // Send a ping to confirm a successful connection
@@ -149,10 +151,10 @@ run().catch(console.dir);
 
 
 
-app.get('/',( req,res)=>{
-    res.send('Life is running')
+app.get('/', (req, res) => {
+  res.send('Life is running')
 })
 
-app.listen(port,()=>{
-    console.log(`life is running on Port :${port}`)
+app.listen(port, () => {
+  console.log(`life is running on Port :${port}`)
 })
