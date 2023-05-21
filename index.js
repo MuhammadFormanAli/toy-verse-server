@@ -56,7 +56,6 @@ async function run() {
 
     app.get('/sort', async (req, res) => {
 
-
       let query = { email: req.query.email };
 
       if (req?.query?.sort == 1) {
@@ -77,13 +76,19 @@ async function run() {
         });
         res.send(toys);
       }
-
-
-
-
     });
 
 
+
+    // route for get trending toys limit is 6
+    app.get('/trending', async (req, res) => {
+      const query = {
+        rating : {$gt : '3'}
+      }
+      const cursor = toysCollection.find(query).limit(6)
+      const result = await cursor.toArray()
+      res.send(result)
+    })
 
     // route for load single toy information
     app.get('/toys/:id', async (req, res) => {
@@ -109,7 +114,6 @@ async function run() {
     app.put('/toys/:id', async (req, res) => {
       const id = req.params.id;
       const toy = req.body;
-      console.log(id, toy);
 
       const filter = { _id: new ObjectId(id) }
       const options = { upsert: true }
@@ -119,6 +123,7 @@ async function run() {
           quantity: toy.quantity,
           description: toy.description
         }
+
       }
 
       const result = await toysCollection.updateOne(filter, updatedToy, options);
